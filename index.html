@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confidential Digital Passport</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #00d4ff;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: #2a2a3e;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+            border: 1px solid #3a3a4e;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .connection-status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .connected {
+            background: #1a4d2e;
+            color: #4ecca3;
+            border: 2px solid #4ecca3;
+        }
+
+        .disconnected {
+            background: #4d1a1a;
+            color: #ff6b6b;
+            border: 2px solid #ff6b6b;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #b0b0b0;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #3a3a4e;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background: #1a1a2e;
+            color: #e0e0e0;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.5);
+        }
+
+        .btn:disabled {
+            background: #4a4a5e;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            color: #808080;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #9d4edd, #7b2cbf);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .passport-info {
+            background: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #00d4ff;
+        }
+
+        .verification-request {
+            background: #2a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 3px solid #ff6b6b;
+        }
+
+        .verification-request.approved {
+            background: #1a2e1a;
+            border-left-color: #4ecca3;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #1a4d2e;
+            color: #4ecca3;
+            border: 1px solid #4ecca3;
+        }
+
+        .alert-error {
+            background: #4d1a1a;
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3a3a4e;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+            color: #b0b0b0;
+        }
+
+        .tab.active {
+            border-bottom-color: #00d4ff;
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .network-info {
+            background: #1a2e2e;
+            border: 1px solid #00d4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .contract-address {
+            font-family: monospace;
+            background: #0f0f1e;
+            padding: 8px;
+            border-radius: 4px;
+            word-break: break-all;
+            color: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Confidential Digital Passport</h1>
+            <p>Privacy-Preserving Digital Identity System on Ethereum</p>
+        </div>
+
+        <div id="connectionStatus" class="connection-status disconnected">
+            📱 Please connect your wallet to continue
+        </div>
+
+        <div class="network-info">
+            <h3>Network Information</h3>
+            <p><strong>Blockchain:</strong> Ethereum Sepolia Testnet</p>
+            <p><strong>Contract Address:</strong> <span class="contract-address">0x3d7Ce3a150a91e51fD5FbE25a539C0D2E24B009d</span></p>
+            <p><strong>Technology:</strong> Zama Fully Homomorphic Encryption (FHE)</p>
+        </div>
+
+        <div class="grid">
+            <!-- Authority Panel -->
+            <div class="card" id="authorityPanel">
+                <h2>🏛️ Government Authority Panel</h2>
+                <div class="form-group">
+                    <label>Citizen Wallet Address</label>
+                    <input type="text" id="ownerAddress" placeholder="0x...">
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" id="passportAge" min="0" max="150">
+                </div>
+                <div class="form-group">
+                    <label>National ID Number</label>
+                    <input type="number" id="nationalId" placeholder="Enter national ID number">
+                </div>
+                <div class="form-group">
+                    <label>Country Code (ISO 3166-1 numeric)</label>
+                    <input type="number" id="citizenshipCode" placeholder="e.g., 840 for USA, 826 for UK">
+                </div>
+                <div class="form-group">
+                    <label>Encrypted Full Name</label>
+                    <input type="text" id="encryptedName" placeholder="Encrypted name data">
+                </div>
+                <div class="form-group">
+                    <label>Encrypted Country Name</label>
+                    <input type="text" id="encryptedCountry" placeholder="Encrypted country data">
+                </div>
+                <div class="form-group">
+                    <label>Passport Validity Period (Years)</label>
+                    <input type="number" id="validityYears" min="1" max="10" value="5">
+                </div>
+                <button class="btn" onclick="issuePassport()">Issue Digital Passport</button>
+
+                <hr style="margin: 20px 0;">
+
+                <div class="form-group">
+                    <label>Verifier Organization Address</label>
+                    <input type="text" id="verifierAddress" placeholder="0x...">
+                </div>
+                <button class="btn btn-secondary" onclick="authorizeVerifier()">Authorize Verifier</button>
+                <button class="btn btn-danger" onclick="revokeVerifier()">Revoke Verifier</button>
+            </div>
+
+            <!-- Passport Holder Panel -->
+            <div class="card">
+                <h2>👤 Passport Holder Dashboard</h2>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('myPassport')">My Passport</div>
+                    <div class="tab" onclick="switchTab('verificationRequests')">Verification Requests</div>
+                </div>
+
+                <div id="myPassport" class="tab-content active">
+                    <button class="btn" onclick="getMyPassport()">Load My Passport Information</button>
+                    <div id="passportDisplay"></div>
+                </div>
+
+                <div id="verificationRequests" class="tab-content">
+                    <button class="btn" onclick="loadVerificationRequests()">Load Pending Requests</button>
+                    <div id="requestsList"></div>
+                </div>
+            </div>
+
+            <!-- Verifier Panel -->
+            <div class="card">
+                <h2>🔍 Verification Organization Panel</h2>
+
+                <div class="form-group">
+                    <label>Passport ID to Verify</label>
+                    <input type="number" id="verifyPassportId" placeholder="Enter passport ID number">
+                </div>
+
+                <div class="form-group">
+                    <label>Purpose of Verification</label>
+                    <textarea id="verificationPurpose" placeholder="Describe why you need to verify this passport (e.g., employment verification, age verification for services, etc.)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Required Verification Types</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="ageVerification">
+                            <label for="ageVerification">Age Verification</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="nationalityVerification">
+                            <label for="nationalityVerification">Nationality Verification</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="identityVerification">
+                            <label for="identityVerification">Identity Verification</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="requestVerification()">Submit Verification Request</button>
+
+                <hr style="margin: 20px 0;">
+
+                <h3>Privacy-Preserving Checks</h3>
+                <div class="form-group">
+                    <label>Minimum Age Requirement</label>
+                    <input type="number" id="minimumAge" placeholder="Enter minimum age (e.g., 18, 21)">
+                </div>
+                <button class="btn btn-secondary" onclick="verifyAge()">Check Age Requirement</button>
+
+                <div class="form-group">
+                    <label>Required Country Code</label>
+                    <input type="number" id="countryCode" placeholder="Enter ISO country code">
+                </div>
+                <button class="btn btn-secondary" onclick="verifyNationality()">Check Nationality</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 System Information</h2>
+            <div id="contractInfo"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.0/dist/ethers.umd.min.js"></script>
+    <script>
+        // Ethers fallback detection
+        if (typeof ethers === 'undefined') {
+            console.error('Ethers.js failed to load from primary CDN');
+            document.write('<script src="https://unpkg.com/ethers@6.13.0/dist/ethers.umd.min.js"><\/script>');
+        }
+    </script>
+    <script>
+        const CONTRACT_ADDRESS = "0x3d7Ce3a150a91e51fD5FbE25a539C0D2E24B009d";
+        const CONTRACT_ABI = [
+            "function authority() view returns (address)",
+            "function nextPassportId() view returns (uint256)",
+            "function issuePassport(address,uint32,uint64,uint32,string,string,uint256)",
+            "function authorizeVerifier(address)",
+            "function revokeVerifier(address)",
+            "function requestVerification(uint256,string,bool,bool,bool)",
+            "function approveVerificationRequest(uint256,uint256)",
+            "function denyVerificationRequest(uint256,uint256)",
+            "function verifyAge(uint256,uint32) returns (bool)",
+            "function verifyNationality(uint256,uint32) returns (bool)",
+            "function getMyPassportId() view returns (uint256)",
+            "function getPassportInfo(uint256) view returns (bool,bool,uint256,uint256,address,string,string)",
+            "function getVerificationRequestCount(uint256) view returns (uint256)",
+            "function getVerificationRequest(uint256,uint256) view returns (address,string,bool,bool,bool,bool,bool,uint256)",
+            "function isValidPassport(uint256) view returns (bool)",
+            "function authorizedVerifiers(address) view returns (bool)",
+            "event PassportIssued(uint256 indexed passportId, address indexed owner, uint256 issuedAt)",
+            "event VerificationRequested(uint256 indexed passportId, address indexed requester, uint256 requestIndex)",
+            "event VerificationApproved(uint256 indexed passportId, address indexed requester, uint256 requestIndex)",
+            "event VerifierAuthorized(address indexed verifier)",
+            "event VerifierRevoked(address indexed verifier)"
+        ];
+
+        let provider, signer, contract, userAddress;
+
+        async function init() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    await connectWallet();
+                } catch (error) {
+                    console.error('Failed to connect wallet:', error);
+                }
+            }
+        }
+
+        async function connectWallet() {
+            try {
+                // Check if ethers is available
+                if (typeof ethers === 'undefined') {
+                    showAlert('Ethers.js library failed to load. Please refresh the page.', 'error');
+                    return;
+                }
+
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+                userAddress = await signer.getAddress();
+
+                const network = await provider.getNetwork();
+                if (network.chainId !== 11155111n) {
+                    showAlert('Please switch to Ethereum Sepolia Testnet (Chain ID: 11155111)', 'error');
+                    return;
+                }
+
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+                updateConnectionStatus(true);
+                loadContractInfo();
+
+                showAlert('Successfully connected to Ethereum Sepolia Testnet!', 'success');
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                showAlert('Failed to connect wallet: ' + error.message, 'error');
+            }
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (connected) {
+                statusEl.className = 'connection-status connected';
+                statusEl.innerHTML = `✅ Connected: ${userAddress.substring(0, 6)}...${userAddress.substring(38)} | Sepolia Testnet`;
+            } else {
+                statusEl.className = 'connection-status disconnected';
+                statusEl.innerHTML = '📱 Please connect your wallet to Ethereum Sepolia Testnet';
+            }
+        }
+
+        async function loadContractInfo() {
+            try {
+                const authority = await contract.authority();
+                const nextId = await contract.nextPassportId();
+                const isAuthorizedVerifier = await contract.authorizedVerifiers(userAddress);
+
+                document.getElementById('contractInfo').innerHTML = `
+                    <div class="passport-info">
+                        <p><strong>Smart Contract:</strong> <span class="contract-address">${CONTRACT_ADDRESS}</span></p>
+                        <p><strong>Government Authority:</strong> <span class="contract-address">${authority}</span></p>
+                        <p><strong>Next Passport ID:</strong> ${nextId}</p>
+                        <p><strong>Your Address:</strong> <span class="contract-address">${userAddress}</span></p>
+                        <p><strong>Role - Authority:</strong> ${authority.toLowerCase() === userAddress.toLowerCase() ? '✅ Yes' : '❌ No'}</p>
+                        <p><strong>Role - Authorized Verifier:</strong> ${isAuthorizedVerifier ? '✅ Yes' : '❌ No'}</p>
+                        <p><strong>Network:</strong> Ethereum Sepolia Testnet</p>
+                        <p><strong>Encryption:</strong> Zama FHE (Fully Homomorphic Encryption)</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading contract info:', error);
+                showAlert('Error loading contract information: ' + error.message, 'error');
+            }
+        }
+
+        async function issuePassport() {
+            try {
+                const ownerAddress = document.getElementById('ownerAddress').value.trim();
+                const age = parseInt(document.getElementById('passportAge').value);
+                const nationalId = document.getElementById('nationalId').value.trim();
+                const citizenshipCode = parseInt(document.getElementById('citizenshipCode').value);
+                const encryptedName = document.getElementById('encryptedName').value.trim();
+                const encryptedCountry = document.getElementById('encryptedCountry').value.trim();
+                const validityYears = parseInt(document.getElementById('validityYears').value);
+
+                if (!ownerAddress || !age || !nationalId || !citizenshipCode || !encryptedName || !encryptedCountry || !validityYears) {
+                    showAlert('Please fill all required fields', 'error');
+                    return;
+                }
+
+                if (!ethers.isAddress(ownerAddress)) {
+                    showAlert('Invalid wallet address format', 'error');
+                    return;
+                }
+
+                showAlert('Submitting passport issuance transaction...', 'success');
+
+                const tx = await contract.issuePassport(
+                    ownerAddress,
+                    age,
+                    nationalId,
+                    citizenshipCode,
+                    encryptedName,
+                    encryptedCountry,
+                    validityYears
+                );
+
+                showAlert('Transaction submitted! Waiting for blockchain confirmation...', 'success');
+                await tx.wait();
+                showAlert('✅ Digital passport issued successfully!', 'success');
+
+                document.getElementById('ownerAddress').value = '';
+                document.getElementById('passportAge').value = '';
+                document.getElementById('nationalId').value = '';
+                document.getElementById('citizenshipCode').value = '';
+                document.getElementById('encryptedName').value = '';
+                document.getElementById('encryptedCountry').value = '';
+
+                loadContractInfo();
+            } catch (error) {
+                console.error('Error issuing passport:', error);
+                showAlert('Error issuing passport: ' + error.message, 'error');
+            }
+        }
+
+        async function authorizeVerifier() {
+            try {
+                const verifierAddress = document.getElementById('verifierAddress').value.trim();
+                if (!verifierAddress) {
+                    showAlert('Please enter verifier address', 'error');
+                    return;
+                }
+
+                if (!ethers.isAddress(verifierAddress)) {
+                    showAlert('Invalid wallet address format', 'error');
+                    return;
+                }
+
+                const tx = await contract.authorizeVerifier(verifierAddress);
+                showAlert('Transaction submitted! Waiting for confirmation...', 'success');
+                await tx.wait();
+                showAlert('✅ Verifier authorized successfully!', 'success');
+
+                loadContractInfo();
+            } catch (error) {
+                console.error('Error authorizing verifier:', error);
+                showAlert('Error authorizing verifier: ' + error.message, 'error');
+            }
+        }
+
+        async function revokeVerifier() {
+            try {
+                const verifierAddress = document.getElementById('verifierAddress').value.trim();
+                if (!verifierAddress) {
+                    showAlert('Please enter verifier address', 'error');
+                    return;
+                }
+
+                if (!ethers.isAddress(verifierAddress)) {
+                    showAlert('Invalid wallet address format', 'error');
+                    return;
+                }
+
+                const tx = await contract.revokeVerifier(verifierAddress);
+                showAlert('Transaction submitted! Waiting for confirmation...', 'success');
+                await tx.wait();
+                showAlert('✅ Verifier access revoked successfully!', 'success');
+
+                loadContractInfo();
+            } catch (error) {
+                console.error('Error revoking verifier:', error);
+                showAlert('Error revoking verifier: ' + error.message, 'error');
+            }
+        }
+
+        async function getMyPassport() {
+            try {
+                const passportId = await contract.getMyPassportId();
+
+                if (passportId.toString() === '0') {
+                    document.getElementById('passportDisplay').innerHTML = '<div class="passport-info"><p>❌ No digital passport found for your address.</p><p>Please contact the government authority to issue your passport.</p></div>';
+                    return;
+                }
+
+                const passportInfo = await contract.getPassportInfo(passportId);
+                const isValid = await contract.isValidPassport(passportId);
+
+                document.getElementById('passportDisplay').innerHTML = `
+                    <div class="passport-info">
+                        <h3>📄 Digital Passport #${passportId}</h3>
+                        <p><strong>Status:</strong> ${isValid ? '✅ Valid' : '❌ Invalid/Expired'}</p>
+                        <p><strong>Active:</strong> ${passportInfo[0] ? '✅ Yes' : '❌ No'}</p>
+                        <p><strong>Government Verified:</strong> ${passportInfo[1] ? '✅ Yes' : '❌ No'}</p>
+                        <p><strong>Issued Date:</strong> ${new Date(passportInfo[2] * 1000).toLocaleDateString()}</p>
+                        <p><strong>Expiration Date:</strong> ${new Date(passportInfo[3] * 1000).toLocaleDateString()}</p>
+                        <p><strong>Passport Holder:</strong> <span class="contract-address">${passportInfo[4]}</span></p>
+                        <p><strong>Encrypted Name:</strong> ${passportInfo[5]}</p>
+                        <p><strong>Encrypted Country:</strong> ${passportInfo[6]}</p>
+                        <p><em>Note: Personal information is encrypted using FHE technology</em></p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error getting passport:', error);
+                showAlert('Error loading passport: ' + error.message, 'error');
+            }
+        }
+
+        async function loadVerificationRequests() {
+            try {
+                const passportId = await contract.getMyPassportId();
+
+                if (passportId.toString() === '0') {
+                    document.getElementById('requestsList').innerHTML = '<div class="passport-info"><p>❌ No passport found.</p></div>';
+                    return;
+                }
+
+                const requestCount = await contract.getVerificationRequestCount(passportId);
+                let html = `<h4>🔍 Verification Requests for Passport #${passportId}</h4>`;
+
+                if (requestCount.toString() === '0') {
+                    html += '<div class="passport-info"><p>📭 No verification requests found.</p></div>';
+                } else {
+                    for (let i = 0; i < requestCount; i++) {
+                        const request = await contract.getVerificationRequest(passportId, i);
+                        html += `
+                            <div class="verification-request ${request[5] ? 'approved' : ''}">
+                                <p><strong>Requesting Organization:</strong> <span class="contract-address">${request[0]}</span></p>
+                                <p><strong>Purpose:</strong> ${request[1]}</p>
+                                <p><strong>Age Verification:</strong> ${request[2] ? '✅ Requested' : '❌ Not requested'}</p>
+                                <p><strong>Nationality Verification:</strong> ${request[3] ? '✅ Requested' : '❌ Not requested'}</p>
+                                <p><strong>Identity Verification:</strong> ${request[4] ? '✅ Requested' : '❌ Not requested'}</p>
+                                <p><strong>Status:</strong> ${request[6] ? (request[5] ? '✅ Approved' : '❌ Denied') : '⏳ Pending Your Approval'}</p>
+                                <p><strong>Request Date:</strong> ${new Date(request[7] * 1000).toLocaleString()}</p>
+                                ${!request[6] ? `
+                                    <button class="btn" onclick="approveRequest(${passportId}, ${i})">✅ Approve Request</button>
+                                    <button class="btn btn-danger" onclick="denyRequest(${passportId}, ${i})">❌ Deny Request</button>
+                                ` : ''}
+                            </div>
+                        `;
+                    }
+                }
+
+                document.getElementById('requestsList').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading verification requests:', error);
+                showAlert('Error loading requests: ' + error.message, 'error');
+            }
+        }
+
+        async function approveRequest(passportId, requestIndex) {
+            try {
+                const tx = await contract.approveVerificationRequest(passportId, requestIndex);
+                showAlert('Transaction submitted! Waiting for confirmation...', 'success');
+                await tx.wait();
+                showAlert('✅ Verification request approved successfully!', 'success');
+                loadVerificationRequests();
+            } catch (error) {
+                console.error('Error approving request:', error);
+                showAlert('Error approving request: ' + error.message, 'error');
+            }
+        }
+
+        async function denyRequest(passportId, requestIndex) {
+            try {
+                const tx = await contract.denyVerificationRequest(passportId, requestIndex);
+                showAlert('Transaction submitted! Waiting for confirmation...', 'success');
+                await tx.wait();
+                showAlert('✅ Verification request denied successfully!', 'success');
+                loadVerificationRequests();
+            } catch (error) {
+                console.error('Error denying request:', error);
+                showAlert('Error denying request: ' + error.message, 'error');
+            }
+        }
+
+        async function requestVerification() {
+            try {
+                const passportId = parseInt(document.getElementById('verifyPassportId').value);
+                const purpose = document.getElementById('verificationPurpose').value.trim();
+                const ageVerification = document.getElementById('ageVerification').checked;
+                const nationalityVerification = document.getElementById('nationalityVerification').checked;
+                const identityVerification = document.getElementById('identityVerification').checked;
+
+                if (!passportId || !purpose) {
+                    showAlert('Please fill passport ID and purpose fields', 'error');
+                    return;
+                }
+
+                if (!ageVerification && !nationalityVerification && !identityVerification) {
+                    showAlert('Please select at least one verification type', 'error');
+                    return;
+                }
+
+                const tx = await contract.requestVerification(
+                    passportId,
+                    purpose,
+                    ageVerification,
+                    nationalityVerification,
+                    identityVerification
+                );
+
+                showAlert('Transaction submitted! Waiting for confirmation...', 'success');
+                await tx.wait();
+                showAlert('✅ Verification request submitted successfully!', 'success');
+
+                document.getElementById('verifyPassportId').value = '';
+                document.getElementById('verificationPurpose').value = '';
+                document.getElementById('ageVerification').checked = false;
+                document.getElementById('nationalityVerification').checked = false;
+                document.getElementById('identityVerification').checked = false;
+            } catch (error) {
+                console.error('Error requesting verification:', error);
+                showAlert('Error requesting verification: ' + error.message, 'error');
+            }
+        }
+
+        async function verifyAge() {
+            try {
+                const passportId = parseInt(document.getElementById('verifyPassportId').value);
+                const minimumAge = parseInt(document.getElementById('minimumAge').value);
+
+                if (!passportId || !minimumAge) {
+                    showAlert('Please enter passport ID and minimum age', 'error');
+                    return;
+                }
+
+                const tx = await contract.verifyAge(passportId, minimumAge);
+                showAlert('Transaction submitted! Waiting for FHE computation...', 'success');
+                await tx.wait();
+                showAlert('✅ Age verification completed! Check transaction events for encrypted result.', 'success');
+            } catch (error) {
+                console.error('Error verifying age:', error);
+                showAlert('Error verifying age: ' + error.message, 'error');
+            }
+        }
+
+        async function verifyNationality() {
+            try {
+                const passportId = parseInt(document.getElementById('verifyPassportId').value);
+                const countryCode = parseInt(document.getElementById('countryCode').value);
+
+                if (!passportId || !countryCode) {
+                    showAlert('Please enter passport ID and country code', 'error');
+                    return;
+                }
+
+                const tx = await contract.verifyNationality(passportId, countryCode);
+                showAlert('Transaction submitted! Waiting for FHE computation...', 'success');
+                await tx.wait();
+                showAlert('✅ Nationality verification completed! Check transaction events for encrypted result.', 'success');
+            } catch (error) {
+                console.error('Error verifying nationality:', error);
+                showAlert('Error verifying nationality: ' + error.message, 'error');
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild.nextSibling);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        window.addEventListener('load', init);
+
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', function (accounts) {
+                if (accounts.length === 0) {
+                    updateConnectionStatus(false);
+                } else {
+                    init();
+                }
+            });
+
+            window.ethereum.on('chainChanged', function (chainId) {
+                window.location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
