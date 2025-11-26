@@ -9,7 +9,7 @@ A production-ready blockchain-based passport system that enables identity verifi
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-2.0.0--gateway-brightgreen)](/)
 
-[🌐 **Live Application**](https://confidential-digital-passport.vercel.app/) | [📜 **Smart Contract**](https://sepolia.etherscan.io/address/0x3d7Ce3a150a91e51fD5FbE25a539C0D2E24B009d) | [🎥 **Video Demo**](Demo%20Video.mp4)
+[🌐 **Live Application**](https://confidential-digital-passport.vercel.app/) | [📜 **Smart Contract**](https://sepolia.etherscan.io/address/0x3d7Ce3a150a91e51fD5FbE25a539C0D2E24B009d) | [🎥 **Video Demo ConfidentialDigitalPassport.mp4**] 
 
 ---
 
