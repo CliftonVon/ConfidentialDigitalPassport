@@ -1,1 +1,28 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
 
+# Validate commit message format
+commit_msg=$(cat "$1")
+
+# Check for conventional commit format
+if ! echo "$commit_msg" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\(.+\))?: .+"; then
+  echo "❌ Invalid commit message format!"
+  echo "📝 Commit message should follow Conventional Commits format:"
+  echo "   <type>(<scope>): <subject>"
+  echo ""
+  echo "   Types: feat, fix, docs, style, refactor, perf, test, chore, build, ci, revert"
+  echo ""
+  echo "   Examples:"
+  echo "   feat(passport): add age verification function"
+  echo "   fix(security): prevent reentrancy in verification"
+  echo "   docs(readme): update deployment instructions"
+  exit 1
+fi
+
+# Check commit message length
+subject_length=$(echo "$commit_msg" | head -n 1 | wc -c)
+if [ "$subject_length" -gt 72 ]; then
+  echo "⚠️  Warning: Commit subject line is longer than 72 characters"
+fi
+
+echo "✅ Commit message format is valid"
