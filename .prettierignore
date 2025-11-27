@@ -1,0 +1,14 @@
+node_modules/
+artifacts/
+cache/
+coverage/
+typechain/
+typechain-types/
+*.min.js
+*.bundle.js
+package-lock.json
+yarn.lock
+.env
+.env.*
+dist/
+build/
